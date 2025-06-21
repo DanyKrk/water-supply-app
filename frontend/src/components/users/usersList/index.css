@@ -1,0 +1,21 @@
+.bottom-space {
+    margin-bottom: 40px;
+    margin-top: 40px;
+}
+
+.table-container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td, th {
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+    border: 1px solid #ccc;
+}

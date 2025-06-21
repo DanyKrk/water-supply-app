@@ -1,0 +1,45 @@
+version: '0.1'
+
+services:
+  backend-service:
+    container_name: backend-service
+    networks: [ wsa ]
+    image: backend_service:latest
+    expose:
+      - '8080'
+    ports:
+      - '8080:8080'
+    environment:
+      spring.data.mongodb.database: WSA-mongo-db
+      spring.data.mongodb.host: WSA-mongo-db
+      spring.data.mongodb.port: 27017
+    depends_on:
+      mongo-db:
+        condition: service_started
+  mongo-db:
+    container_name: WSA-mongo-db
+    networks: [ wsa ]
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    ports:
+      - '27017:27017'
+    volumes:
+        - wsa-data:/data/mongodb
+  frontend:
+    container_name: frontend
+    networks: [ wsa ]
+    image: frontend:latest
+    ports:
+      - '5173:5173'
+    depends_on:
+      backend-service:
+        condition: service_started
+
+networks:
+  wsa:
+    name: wsa
+    driver: bridge
+    external: true
+
+volumes:
+  wsa-data:
+    external: true

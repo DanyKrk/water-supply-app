@@ -1,0 +1,45 @@
+.main-header .collapse, .main-header .collapsing {
+    justify-content: flex-start;
+}
+
+.navbar-expand-xl {
+    display: flex;
+}
+
+.full-width-container {
+    max-width: 2500px !important;
+}
+
+.nav-link {
+    cursor: pointer;
+}
+
+.text-color {
+    font-size: 15px !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    color: #00A3E5 !important;
+}
+
+
+.navbar > .container, .navbar > .container-fluid, .navbar > .container-xl, .navbar > .container-md, .navbar > .container-sm, .navbar > .container-xl, .navbar > .container-xxl {
+    display: flex;
+    flex-wrap: inherit;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar .nav-link {
+    margin-right: 50px;
+}
+
+.navbar > .container {
+    margin-right: 2%;
+    margin-left: 2%;
+}
+
+.navbar-gradient {
+    background: white !important;
+}
+
+

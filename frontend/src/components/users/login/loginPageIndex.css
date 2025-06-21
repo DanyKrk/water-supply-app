@@ -1,0 +1,13 @@
+.alert {
+    transition: opacity 500ms ease-in-out;
+}
+
+.alert-hidden {
+    opacity: 0;
+    display: none;
+}
+
+.centered-collapse {
+    width: 80%;
+    margin: 0 auto;
+}
