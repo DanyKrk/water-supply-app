@@ -35,8 +35,14 @@ const AddUserPage = () => {
 
 
     const handleSubmit = async () => {
-        if (registerData.password != passwordCheck) {
-            setError("Błąd! Hasła się od siebie różnią.")
+        if (registerData.password !== passwordCheck) {
+            setError("Błąd! Hasła się od siebie różnią.");
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+        if (!passwordRegex.test(registerData.password)) {
+            setError("Błąd! Hasło nie spełnia wymogów bezpieczeństwa (min. 12 znaków, wielka i mała litera, cyfra, znak specjalny).");
             return;
         }
 

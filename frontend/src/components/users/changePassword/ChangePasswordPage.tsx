@@ -42,8 +42,12 @@ const ChangePasswordPage = () => {
         if (userData.password != passwordCheck) {
             setError("Błąd! Hasła się od siebie różnią.")
             return;
-        } else if (userData.password == '') {
-            setError("Błąd! Należy podać nowe hasło.")
+        } 
+   
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+        if (!passwordRegex.test(userData.password)) {
+            setError("Błąd! Hasło nie spełnia wymogów bezpieczeństwa (min. 12 znaków, wielka i mała litera, cyfra, znak specjalny).");
+            setShow(false); 
             return;
         }
 

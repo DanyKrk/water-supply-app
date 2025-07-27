@@ -8,6 +8,7 @@ import eu.waterlineproject.app.supply.water.model.user.UserEntity;
 import eu.waterlineproject.app.supply.water.model.user.dto.UserPasswordDto;
 import eu.waterlineproject.app.supply.water.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +71,7 @@ public class UserController {
 
     @PutMapping("/updatePassword")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Void> updatePassword(@RequestBody UserPasswordDto userDto,
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UserPasswordDto userDto,
                                                HttpServletRequest request) {
         final String token = jwtUtils.parseJwt(request);
         final String username = jwtUtils.extractUsername(token);
