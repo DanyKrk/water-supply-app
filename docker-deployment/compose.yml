@@ -19,8 +19,6 @@ services:
     container_name: WSA-mongo-db
     networks: [ wsa ]
     image: mongodb/mongodb-community-server:6.0-ubi8
-    ports:
-      - '27017:27017'
     volumes:
         - wsa-data:/data/mongodb
   frontend:
