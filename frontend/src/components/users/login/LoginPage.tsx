@@ -9,6 +9,7 @@ import "./loginPageIndex.css"
 
 const LoginPage = () => {
     const [open, setOpen] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState(""); // Nowy stan do przechowywania wiadomości błędu
     const [loginData, setLoginData] = useState({
         username: '',
         password: ''
@@ -44,7 +45,12 @@ const LoginPage = () => {
                 if (user) {
                     showSpotsList();
                 }
-            }).catch(() => {
+            }).catch((error) => {
+                if (error.response && error.response.status === 403) {
+                    setErrorMessage("Konto zostało tymczasowo zablokowane z powodu zbyt wielu nieudanych prób. Spróbuj ponownie za 15 minut.");
+                } else {
+                    setErrorMessage("Błąd! Login lub hasło jest nieprawidłowe.");
+                }
                 setOpen(true);
             });
     };
@@ -62,7 +68,7 @@ const LoginPage = () => {
                             setOpen(false)
                         }}
                     >
-                        Błąd! Login lub hasło jest nieprawidłowe. {/*TODO message should depend on error type*/}
+                        {errorMessage}
                     </Alert>
                 </div>
             </Collapse>
