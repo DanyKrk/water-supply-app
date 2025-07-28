@@ -9,6 +9,7 @@ import eu.waterlineproject.app.supply.water.model.refreshtoken.RefreshTokenRepos
 import eu.waterlineproject.app.supply.water.model.user.ERole;
 import eu.waterlineproject.app.supply.water.model.user.UserEntity;
 import eu.waterlineproject.app.supply.water.model.user.UserRepository;
+import eu.waterlineproject.app.supply.water.security.jwt.JwtDenylistService;
 import eu.waterlineproject.app.supply.water.security.jwt.JwtUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ public abstract class ControllerBaseIT extends BaseIT {
 
     @Autowired
     JwtUtils jwtUtils;
+    
+    @Autowired
+    JwtDenylistService jwtDenylistService;
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -64,7 +68,8 @@ public abstract class ControllerBaseIT extends BaseIT {
     @BeforeEach
     public void setUp() {
         webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
-        authController = new AuthController(authenticationManager, userRepository, userService, encoder, jwtUtils, refreshTokenService);
+        
+        authController = new AuthController(authenticationManager, userRepository, userService, encoder, jwtUtils, refreshTokenService, jwtDenylistService);
 
         UserEntity user = new UserEntity(
                 USERNAME,

@@ -1,6 +1,7 @@
 package eu.waterlineproject.app.supply.water.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.waterlineproject.app.supply.water.application.exception.TokenInvalidatedException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Component("authEntryPointJwt") 
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     @Override
@@ -30,11 +31,16 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
             body.put("status", HttpServletResponse.SC_FORBIDDEN);
             body.put("error", "Forbidden");
             body.put("message", "User account is locked");
-        } else {
+        } else if (authException instanceof TokenInvalidatedException) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
             body.put("error", "Unauthorized");
             body.put("message", authException.getMessage());
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+            body.put("error", "Unauthorized");
+            body.put("message", "Bad credentials or invalid token");
         }
 
         final ObjectMapper mapper = new ObjectMapper();

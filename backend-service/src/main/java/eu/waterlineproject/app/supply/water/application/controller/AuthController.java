@@ -10,6 +10,7 @@ import eu.waterlineproject.app.supply.water.application.service.RefreshTokenServ
 import eu.waterlineproject.app.supply.water.application.service.UserService;
 import eu.waterlineproject.app.supply.water.model.refreshtoken.RefreshToken;
 import eu.waterlineproject.app.supply.water.model.user.*;
+import eu.waterlineproject.app.supply.water.security.jwt.JwtDenylistService;
 import eu.waterlineproject.app.supply.water.security.jwt.JwtUtils;
 import eu.waterlineproject.app.supply.water.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -38,6 +40,7 @@ public class AuthController {
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
+    private final JwtDenylistService denylistService;
 
     @PostMapping("/login")
     public ResponseEntity<AccessTokenResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -103,5 +106,15 @@ public class AuthController {
                     return ResponseEntity.ok(new RefreshTokenResponse(accessToken));
                 }).orElseThrow(() -> new RuntimeException(
                         "Refresh token is not in database!"));
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> logoutUser(@RequestHeader("Authorization") String token) {
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            denylistService.denylist(jwt);
+        }
+        return ResponseEntity.ok(new MessageResponse("Logout successful!"));
     }
 }

@@ -34,6 +34,8 @@ const refresh = (refreshToken: string) => {
 };
 
 export const logout = () => {
+    axios.post("/auth/logout", {}, { headers: authHeader() });
+    
     localStorage.clear();
 };
 
