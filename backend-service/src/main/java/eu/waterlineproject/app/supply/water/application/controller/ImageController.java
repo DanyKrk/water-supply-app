@@ -1,18 +1,22 @@
 package eu.waterlineproject.app.supply.water.application.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.waterlineproject.app.supply.water.application.service.ImageService;
 import eu.waterlineproject.app.supply.water.model.image.ImageEntity;
-import eu.waterlineproject.app.supply.water.model.spot.SpotEntity;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -31,21 +35,38 @@ public class ImageController {
 
     @PostMapping("/{spotID}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Void> uploadImage(@PathVariable("spotID") UUID spotID, @RequestPart("file") List<MultipartFile> images) {
+    public ResponseEntity<Void> uploadImage(@PathVariable("spotID") UUID spotID,
+                                            @RequestPart("file") List<MultipartFile> images,
+                                            HttpServletResponse response) throws IOException { 
         if (images.isEmpty()) {
             log.error("List of files is empty");
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         try {
             for (MultipartFile image : images) {
-                imageService.addImage(new ImageEntity(spotID, image.getBytes()));
+                imageService.validateAndSaveImage(spotID, image);
             }
-            log.info("Image was uploaded and processed successfully");
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            log.info("Images were uploaded and processed successfully");
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid file uploaded: {}", e.getMessage());
+            
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            final Map<String, Object> body = new HashMap<>();
+            body.put("status", HttpServletResponse.SC_BAD_REQUEST);
+            body.put("error", "Bad Request");
+            body.put("message", e.getMessage());
+
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(response.getOutputStream(), body);
+            
+            return null;
         } catch (IOException e) {
-            log.error("Unable to read file");
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            log.error("Unable to read file", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

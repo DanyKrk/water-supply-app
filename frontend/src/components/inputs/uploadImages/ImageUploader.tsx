@@ -1,7 +1,6 @@
 import React from 'react';
-import {useDropzone} from 'react-dropzone';
+import {useDropzone, FileRejection} from 'react-dropzone'; 
 import "./imageUploader.css";
-import TopNavbar from "../../common/topNavbar/TopNavbar.tsx";
 import Button from "@mui/material/Button";
 import EventBus from "../../../common/EventBus.ts";
 import {Alert} from "@mui/material";
@@ -9,9 +8,9 @@ import {Collapse} from "react-bootstrap";
 import ImageService from "../../../services/images/ImageService.ts";
 import SpotId from "../../../constants/inputs/SpotId.ts";
 
+const MAX_SIZE_BYTES = 20 * 1024 * 1024; 
 
 const ImageUploader: React.FC<SpotId> = ({spotId}) => {
-    const allowedExtensions = ["jpg", "jpeg", "png"];
     const [error, setError] = React.useState("");
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
     const [isTableVisible, setIsTableVisible] = React.useState(false);
@@ -24,22 +23,24 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
         setIsDescriptionVisible(true);
     }
 
-    const onDrop = (acceptedFiles: File[]) => {
-        const filteredFiles: File[] = acceptedFiles.filter((file) => {
-            const fileExtension = file.name.toLowerCase().slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2);
-            return allowedExtensions.includes(fileExtension);
-        });
-        if (filteredFiles.length !== acceptedFiles.length) {
-            if (filteredFiles.length === 0) {
-                setError("Pliki posiadają nieodpowiednie rozszerzenie. Akceptowalne rozszerzenia: jpg, jpeg, png,")
+    const onDrop = React.useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
+        if (fileRejections.length > 0) {
+            const firstRejection = fileRejections[0];
+            if (firstRejection.errors.some(e => e.code === 'file-too-large')) {
+                setError(`Błąd! Plik jest za duży. Maksymalny rozmiar to 20 MB.`);
+            } else if (firstRejection.errors.some(e => e.code === 'file-invalid-type')) {
+                setError("Wybrano pliki o nieodpowiednim typie. Akceptowalne są tylko obrazy JPG i PNG.");
             } else {
-                setError("Część wybranych plików posiada nieodpowiednie rozszerzenie. Akceptowalne rozszerzenia: jpg, jpeg, png")
+                 setError("Wystąpił nieznany błąd podczas wyboru plików.");
             }
+        } else {
+            setError("");
         }
-        setSelectedFiles(filteredFiles);
-        setIsTableVisible(filteredFiles.length > 0);
-        setIsDescriptionVisible(filteredFiles.length === 0);
-    };
+
+        setSelectedFiles(acceptedFiles);
+        setIsTableVisible(acceptedFiles.length > 0);
+        setIsDescriptionVisible(acceptedFiles.length === 0);
+    }, []);
 
     const send = async () => {
         if (selectedFiles.length > 0) {
@@ -58,7 +59,7 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
                         EventBus.dispatch("refresh");
                         location.reload();
                     } else {
-                        setError("Błąd! Nie można załadować zdjęć")
+                        setError("Błąd! Nie można załadować zdjęć. Sprawdź, czy pliki nie są uszkodzone i mają prawidłowy format (JPG, PNG).")
                     }
                 });
         }
@@ -66,12 +67,16 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
 
     const {getRootProps, getInputProps} = useDropzone({
         onDrop,
-        multiple: true
+        multiple: true,
+        accept: {
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/png': ['.png']
+        },
+        maxSize: MAX_SIZE_BYTES 
     });
 
     return (
         <>
-            <TopNavbar/>
             <h1 className="bottom-space">Dodaj zdjęcia do punktu pomiarowego</h1>
             <Collapse in={error.length > 0} className="centered-collapse">
                 <div className={`alert ${error.length > 0 ? '' : 'alert-hidden'}`}>
@@ -110,7 +115,7 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
                 <input {...getInputProps()} />
                 {isDescriptionVisible &&
                     <p className="text-center">
-                        Przeciągnij i upuść pliki tutaj lub kliknij, aby wybrać pliki
+                        Przeciągnij i upuść pliki tutaj lub kliknij, aby wybrać pliki (tylko JPG, PNG, max 20MB)
                     </p>
                 }
                 {isTableVisible && (
@@ -138,7 +143,6 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
                 <Button variant="contained" size="medium"
                         onClick={reset}
                         style={{marginRight: "15px"}}>
-
                     Wymaż
                 </Button>
                 <Button variant="contained" size="medium"
@@ -146,7 +150,6 @@ const ImageUploader: React.FC<SpotId> = ({spotId}) => {
                     Dodaj
                 </Button>
             </div>
-
         </>
     );
 }
