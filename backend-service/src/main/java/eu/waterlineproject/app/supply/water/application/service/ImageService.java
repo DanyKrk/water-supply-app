@@ -38,12 +38,10 @@ public class ImageService {
     }
 
     private void validateImage(MultipartFile file) throws IOException, IllegalArgumentException {
-        // Krok 1: Walidacja typu MIME
         if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
             throw new IllegalArgumentException("Niedozwolony typ pliku (Content-Type): " + file.getContentType());
         }
 
-        // Krok 2: Walidacja sygnatury (Magic Bytes)
         try (InputStream is = file.getInputStream()) {
             byte[] signature = new byte[4];
             int bytesRead = is.read(signature, 0, 4);
