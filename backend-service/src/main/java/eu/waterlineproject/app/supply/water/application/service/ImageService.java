@@ -39,7 +39,7 @@ public class ImageService {
 
     private void validateImage(MultipartFile file) throws IOException, IllegalArgumentException {
         if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
-            throw new IllegalArgumentException("Niedozwolony typ pliku (Content-Type): " + file.getContentType());
+            throw new IllegalArgumentException("Invalid file Content-Type: " + file.getContentType());
         }
 
         try (InputStream is = file.getInputStream()) {
@@ -47,14 +47,14 @@ public class ImageService {
             int bytesRead = is.read(signature, 0, 4);
 
             if (bytesRead < 3) {
-                throw new IllegalArgumentException("Plik jest zbyt mały, aby zweryfikować sygnaturę.");
+                throw new IllegalArgumentException("File is too small to verify signature.");
             }
 
             boolean isJpeg = Arrays.equals(Arrays.copyOf(signature, 3), JPEG_SIGNATURE);
             boolean isPng = (bytesRead >= 4) && Arrays.equals(signature, PNG_SIGNATURE);
 
             if (!isJpeg && !isPng) {
-                throw new IllegalArgumentException("Nieprawidłowa zawartość pliku. Plik nie jest obrazem JPEG ani PNG.");
+                throw new IllegalArgumentException("Invalid file content. The file is not a valid JPEG or PNG image.");
             }
         }
     }

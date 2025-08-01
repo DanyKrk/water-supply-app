@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,10 +18,10 @@ public class SignUpRequest {
     private String role;
 
     @NotBlank
-    @Size(min = 12, message = "Hasło musi mieć co najmniej 12 znaków")
+    @Size(min = 12, message = "Password must be at least 12 characters long")
     @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,}$",
-        message = "Hasło musi zawierać co najmniej jedną wielką i małą literę, cyfrę oraz znak specjalny"
+        message = "Password must contain at least one uppercase and lowercase letter, a digit, and a special character"
     )
     String password;
 
